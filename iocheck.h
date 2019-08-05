@@ -30,9 +30,14 @@
 
 #include "util.h"
 
+#ifndef __cplusplus
+
 #define bool int
 #define true 1
 #define false 0
+
+#endif
+
 #define random(x) (rand() % x)
 
 #define MAX_KEY_LENGTH            128
@@ -93,7 +98,7 @@ struct io_thread {
 
 struct db_ops {
 	db_t *(*kv_open)(const char *dev_name, const char *db_name, char **err);
-	void (*kv_close)();
+	void (*kv_close)(db_t *db);
 
 	/* read/write options */
 	kv_readoptions_t *(*kv_readoptions_create)();
@@ -105,9 +110,9 @@ struct db_ops {
 	void (*kv_writeoptions_set_sync)(kv_writeoptions_t *opt, unsigned char v);
 
 	/* read batch */
-	void *(*kv_readbatch_create)();
+	kv_readbatch_t *(*kv_readbatch_create)();
 	int (*kv_readbatch_add)(kv_readbatch_t *batch, const char *key, unsigned int key_len,
-				const char *val_buf, unsigned int buf_size, unsigned int *value_len,
+				char *val_buf, unsigned int buf_size, unsigned int *value_len,
 				unsigned int *status, char **err);
 	void (*kv_readbatch_submit)(db_t *db_handle, const kv_readoptions_t *opt, kv_readbatch_t *batch,
 								unsigned int *failed_cmd_count, char **err);
@@ -115,7 +120,7 @@ struct db_ops {
 	void (*kv_readbatch_destroy)(kv_readbatch_t *batch);
 
 	/* write batch */
-	void *(*kv_writebatch_create)();
+	kv_writebatch_t *(*kv_writebatch_create)();
 	int (*kv_writebatch_add)(kv_writebatch_t *batch, const char *key, unsigned int key_len,
 				const char *val, unsigned int val_len, char **err);
 	void (*kv_writebatch_submit)(db_t *db_handle, const kv_writeoptions_t *opt, kv_writebatch_t *batch, char **err);
@@ -185,8 +190,18 @@ struct io_check {
 	double total_write_count;
 };
 
+#ifndef __cplusplus
+
 struct db_ops *get_shannon_db_ops();
 struct db_ops *get_leveldb_ops();
 struct db_ops *get_rocksdb_ops();
+
+#else
+
+extern "C" struct db_ops *get_shannon_db_ops();
+extern "C" struct db_ops *get_leveldb_ops();
+extern "C" struct db_ops *get_rocksdb_ops();
+
+#endif
 
 #endif
