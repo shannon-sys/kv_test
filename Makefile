@@ -6,8 +6,8 @@
 
 CFLAGS += -Wall
 LIBS += -lpthread -lstdc++
-SHANNONDB_FLAG += -lshannon_db -DSHANNONDB
-SHANNONDB_CXX_FLAG += -lshannondb_cxx -DSHANNONDB
+SHANNONDB_FLAG += -lshannondb -DSHANNONDB
+SHANNONDB_CXX_FLAG += -lshannondb -DSHANNONDB
 LEVELDB_FLAG += -lleveldb -lsnappy -DLEVELDB
 ROCKSDB_FLAG += -lrocksdb -lsnappy -DROCKSDB
 
