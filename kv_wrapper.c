@@ -175,6 +175,20 @@ int leveldb_kv_delete(db_t *db_handle, const kv_writeoptions_t *opt, const char 
 	return *err != NULL;
 }
 
+int leveldb_kv_writebatch_add(kv_writebatch_t *batch, const char *key, unsigned int key_len,
+		const char *val, unsigned int val_len, char **err)
+{
+	leveldb_writebatch_put(batch, key, key_len, val, val_len);
+	*err = NULL;
+	return 0;
+}
+
+void leveldb_kv_writebatch_submit(db_t *db_handle, const kv_writeoptions_t *opt, kv_writebatch_t *batch, char **err)
+{
+	struct leveldb_handle *db = (struct leveldb_handle *)db_handle;
+	return leveldb_write(db->db, opt, batch, err);
+}
+
 struct db_ops leveldb_ops = {
 	.kv_open	= leveldb_kv_open,
 	.kv_close	= leveldb_kv_close,
@@ -186,6 +200,12 @@ struct db_ops leveldb_ops = {
 
 	.kv_readoptions_set_fill_cache = (void *)leveldb_readoptions_set_fill_cache,
 	.kv_writeoptions_set_sync	= (void *)leveldb_writeoptions_set_sync,
+
+	.kv_writebatch_create		= (void *)leveldb_writebatch_create,
+	.kv_writebatch_add			= leveldb_kv_writebatch_add,
+	.kv_writebatch_submit		= leveldb_kv_writebatch_submit,
+	.kv_writebatch_clear		= (void *)leveldb_writebatch_clear,
+	.kv_writebatch_destroy		= (void *)leveldb_writebatch_destroy,
 
 	.kv_get		= leveldb_kv_get,
 	.kv_put		= leveldb_kv_put,
@@ -269,6 +289,20 @@ int rocksdb_kv_delete(db_t *db_handle, const kv_writeoptions_t *opt, const char 
 	return *err != NULL;
 }
 
+int rocksdb_kv_writebatch_add(kv_writebatch_t *batch, const char *key, unsigned int key_len,
+		const char *val, unsigned int val_len, char **err)
+{
+	rocksdb_writebatch_put(batch, key, key_len, val, val_len);
+	*err = NULL;
+	return 0;
+}
+
+void rocksdb_kv_writebatch_submit(db_t *db_handle, const kv_writeoptions_t *opt, kv_writebatch_t *batch, char **err)
+{
+	struct rocksdb_handle *db = (struct rocksdb_handle *)db_handle;
+	return rocksdb_write(db->db, opt, batch, err);
+}
+
 struct db_ops rocksdb_ops = {
 	.kv_open	= rocksdb_kv_open,
 	.kv_close	= rocksdb_kv_close,
@@ -280,6 +314,12 @@ struct db_ops rocksdb_ops = {
 
 	.kv_readoptions_set_fill_cache = (void *)rocksdb_readoptions_set_fill_cache,
 	.kv_writeoptions_set_sync	= (void *)rocksdb_writeoptions_set_sync,
+
+	.kv_writebatch_create		= (void *)rocksdb_writebatch_create,
+	.kv_writebatch_add			= rocksdb_kv_writebatch_add,
+	.kv_writebatch_submit		= rocksdb_kv_writebatch_submit,
+	.kv_writebatch_clear		= (void *)rocksdb_writebatch_clear,
+	.kv_writebatch_destroy		= (void *)rocksdb_writebatch_destroy,
 
 	.kv_get		= rocksdb_kv_get,
 	.kv_put		= rocksdb_kv_put,
